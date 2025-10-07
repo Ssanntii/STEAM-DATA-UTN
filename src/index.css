@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+/* ============================================
+   CONFIGURACIÓN DE TEMA TAILWIND 4
+   ============================================ */
+@theme {
+  /* Colores personalizados tipo Steam */
+  --color-steam-blue: #1b2838;
+  --color-steam-dark: #171a21;
+  --color-steam-light: #2a475e;
+  --color-steam-accent: #66c0f4;
+  --color-steam-green: #5c7e10;
+  --color-steam-red: #cd5c5c;
+  
+  /* Colores del sistema (usando las CSS vars) */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  /* Breakpoints personalizados si los necesitas */
+  --breakpoint-3xl: 1920px;
+  
+  /* Animaciones personalizadas */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-scale: scale-in 0.2s ease-out;
+}
+
+/* ============================================
+   VARIABLES CSS GLOBALES
+   ============================================ */
+:root {
+  /* Glass morphism */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  
+  /* Colores del tema claro */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+}
+
+.dark,
+html.dark {
+  /* Glass morphism para dark mode */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  /* Colores del tema oscuro */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
+}
+
+/* ============================================
+   ESTILOS BASE
+   ============================================ */
+body {
+  @apply bg-background text-foreground antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADO
+   ============================================ */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-950;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors;
+}
+
+::-webkit-scrollbar-corner {
+  @apply bg-gray-950;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(55 65 81) rgb(3 7 18);
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* ============================================
+   CLASES UTILITARIAS PERSONALIZADAS
+   ============================================ */
+
+/* Container personalizado */
+.container {
+  @apply mx-auto px-4 sm:px-6 lg:px-8;
+  max-width: 1400px;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Gradiente tipo Steam */
+.steam-gradient {
+  background: linear-gradient(135deg, #1b2838 0%, #2a475e 50%, #1b2838 100%);
+}
+
+.steam-gradient-radial {
+  background: radial-gradient(circle at top, #2a475e 0%, #1b2838 100%);
+}
+
+/* Efectos de hover suaves */
+.hover-lift {
+  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+}
+
+.hover-glow {
+  @apply transition-all duration-300;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(102, 192, 244, 0.3);
+}
+
+/* Loading shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Text utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent;
+}
+
+/* Focus styles mejorados */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-background;
+}
+
+/* ============================================
+   COMPONENTES AUXILIARES
+   ============================================ */
+
+/* Skeleton loader */
+.skeleton {
+  @apply animate-pulse bg-gray-800 rounded;
+}
+
+/* Badge/Tag style */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Card base */
+.card {
+  @apply rounded-xl bg-card text-card-foreground shadow-lg;
+}
+
+/* ============================================
+   RESPONSIVE HELPERS
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

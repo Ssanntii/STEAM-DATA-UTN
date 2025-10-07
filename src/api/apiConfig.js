@@ -1,24 +1,15 @@
 const apiConfig = {
-  // API principal de Steam (requiere key para algunos endpoints)
-  // En desarrollo usa el proxy, en producción la URL real
   baseURL: import.meta.env.DEV ? '/steam-api/' : import.meta.env.VITE_URL,
-  
-  // Store API (sin autenticación, mejor para detalles de juegos)
   storeURL: import.meta.env.DEV ? '/steam-store/api/' : 'https://store.steampowered.com/api/',
-  
-  // Community API (para imágenes y recursos públicos)
   communityURL: 'https://steamcommunity.com/',
   
-  // Tu API key
-  apiKey: import.meta.env.VITE_TOKEN,
-  
-  // Tu Steam ID (útil para endpoints de usuario)
+  // CAMBIAR esta línea:
+  apiKey: import.meta.env.VITE_STEAM_API_KEY, // <- Cambiado de VITE_TOKEN
   steamId: import.meta.env.VITE_STEAM_ID,
   
   timeout: 10000,
   
-  // Helper para construir URLs de imágenes
-  getAppImageURL: (appId, hash) => 
+  getAppImageURL: (appId) => 
     `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
   
   getCapsuleImage: (appId) => 

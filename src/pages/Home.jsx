@@ -1,74 +1,154 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { RefreshCw } from "lucide-react";
 import HeroSlide from "../components/HeroSlide";
 import GameGrid from "../components/GameGrid";
-import steamApi from "../api/steamApi";
-import apiConfig from "../api/apiConfig";
+import useGamesStore from "../hooks/useGamesStore";
 
 export default function Home() {
-  const [topGames, setTopGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { 
+    topGames, 
+    loading, 
+    error, 
+    progress,
+    fetchTopGames,
+    refresh 
+  } = useGamesStore();
 
   useEffect(() => {
-    const fetchTopGames = async () => {
-      try {
-        setLoading(true);
-        const response = await steamApi.getTopPlayed();
-        
-        console.log('Steam API Response:', response); // Para debug
-        
-        // La respuesta de Steam viene en response.response.ranks
-        const games = response?.response?.ranks || [];
-        
-        // Transformar los datos para que coincidan con tu estructura
-        const transformedGames = games.map(game => ({
-          appid: game.appid,
-          rank: game.rank,
-          name: `Game ${game.appid}`, // Steam no devuelve nombre en este endpoint
-          players: game.concurrent_in_game?.toLocaleString() || '0',
-          // Construir URLs de imágenes
-          image: apiConfig.getCapsuleImage(game.appid),
-          background: apiConfig.getLibraryImage(game.appid),
-          short_description: `Ranked #${game.rank} - ${game.concurrent_in_game?.toLocaleString()} players online`
-        }));
-
-        setTopGames(transformedGames);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching top games:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopGames();
-  }, []);
+    fetchTopGames(20);
+  }, [fetchTopGames]);
 
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
+        <div className="text-center glass p-8 rounded-2xl max-w-md">
+          <div className="text-6xl mb-4">😕</div>
           <h2 className="text-2xl font-bold text-red-400 mb-2">Error</h2>
-          <p className="text-gray-400">{error}</p>
-          <p className="text-sm text-gray-500 mt-4">
-            Verifica la consola para más detalles. Es posible que haya problemas de CORS.
+          <p className="text-gray-400 mb-4">{error}</p>
+          <p className="text-sm text-gray-500">
+            Posibles causas:
           </p>
+          <ul className="text-sm text-gray-500 text-left mt-2 space-y-1">
+            <li>• Problemas de CORS (verifica el proxy en vite.config.js)</li>
+            <li>• API key inválida o expirada</li>
+            <li>• Rate limiting de Steam</li>
+            <li>• Conexión a internet</li>
+          </ul>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <HeroSlide games={topGames.slice(0, 10)} loading={loading} />
-      
+    <div className="space-y-8 pb-12">
+      {/* Hero Carousel */}
+      <section>
+        <HeroSlide games={topGames.slice(0, 10)} loading={loading} />
+      </section>
+
+      {/* Loading Progress */}
+      {loading && progress < 100 && (
+        <div className="px-6">
+          <div className="glass p-6 rounded-2xl">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-400">
+                Cargando juegos por primera vez...
+              </span>
+              <span className="text-sm font-semibold text-blue-400">
+                {progress}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Los datos se guardarán en caché por 5 minutos. Las siguientes visitas serán instantáneas.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Top Games Grid */}
       <section className="px-6">
-        <h2 className="text-2xl font-semibold text-white mb-4">
-          Top Juegos Más Jugados
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              Top Juegos Más Jugados
+            </h2>
+            <p className="text-sm text-gray-400 mt-1">
+              Los juegos con más jugadores activos ahora mismo
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {topGames.length > 0 && (
+              <span className="text-sm text-gray-500">
+                {topGames.length} juegos
+              </span>
+            )}
+            <button
+              onClick={refresh}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg transition-colors text-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
+          </div>
+        </div>
         <GameGrid games={topGames} loading={loading} />
       </section>
+
+      {/* Stats Section */}
+      {!loading && topGames.length > 0 && (
+        <section className="px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="glass p-6 rounded-2xl">
+              <div className="text-3xl font-bold text-blue-400">
+                {topGames[0]?.players || '0'}
+              </div>
+              <div className="text-sm text-gray-400 mt-1">
+                Jugadores en #{1}
+              </div>
+              <div className="text-xs text-gray-500 mt-1 truncate">
+                {topGames[0]?.name || 'N/A'}
+              </div>
+            </div>
+
+            <div className="glass p-6 rounded-2xl">
+              <div className="text-3xl font-bold text-cyan-400">
+                {topGames.reduce((sum, game) => sum + (game.concurrent_in_game || 0), 0).toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-400 mt-1">
+                Total de jugadores
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                En top {topGames.length} juegos
+              </div>
+            </div>
+
+            <div className="glass p-6 rounded-2xl">
+              <div className="text-3xl font-bold text-purple-400">
+                {topGames.filter(g => g.price === 'Gratis').length}
+              </div>
+              <div className="text-sm text-gray-400 mt-1">
+                Juegos gratuitos
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                En el top {topGames.length}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

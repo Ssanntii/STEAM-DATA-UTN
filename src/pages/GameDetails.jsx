@@ -107,7 +107,7 @@ const GameDetails = () => {
               backgroundImage: `url(${game.background || game.background_raw})`,
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+            <div className="absolute inset-0" />
             <div className="absolute bottom-0 left-0 right-0 p-8">
               <div className="flex items-start gap-6">
                 <img

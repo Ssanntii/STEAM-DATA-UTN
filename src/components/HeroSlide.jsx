@@ -1,9 +1,10 @@
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation, Autoplay } from "swiper/modules";
 import { motion } from "framer-motion";
-import { Play, Users, TrendingUp } from "lucide-react";
+import { Play, Info, Users, TrendingUp } from "lucide-react";
 import Button from "../components/ui/Button"
 
 const HeroSkeleton = () => (
@@ -35,7 +36,7 @@ const HeroSlide = ({ games, loading }) => {
         loop={games.length > 1}
         className="w-full h-[70vh] rounded-2xl overflow-hidden shadow-2xl"
       >
-        {games.map((game, index) => (
+        {games.map((game) => (
           <SwiperSlide key={game.appid}>
             <motion.div
               className="relative w-full h-full flex items-end justify-start bg-cover bg-center"
@@ -47,13 +48,10 @@ const HeroSlide = ({ games, loading }) => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Overlay gradiente mejorado */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
               
               {/* Contenido */}
               <motion.div 
-                className="relative z-10 p-8 md:p-12 max-w-2xl"
+                className="relative z-10 p-8 md:p-12 max-w-3xl"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
@@ -110,18 +108,29 @@ const HeroSlide = ({ games, loading }) => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.6, duration: 0.6 }}
                 >
-              <Button 
-                variant="primary" 
-                size="lg"
-                className="font-semibold"
-              >
-                <Play className="w-5 h-5" fill="currentColor" />
-                Ver detalles
-                </Button>
+                  {/* Botón "Jugar ahora" (enlace externo a Steam) */}
+                  <a
+                    href={`https://store.steampowered.com/app/${game.appid}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button 
+                      variant="primary" 
+                      size="lg"
+                      className="font-semibold"
+                    >
+                      <Play className="w-5 h-5" fill="currentColor" />
+                      Jugar ahora
+                    </Button>
+                  </a>
 
-                <Button variant="outline">
-                Más información
-                </Button>
+                  {/* Botón "Más información" (enlace interno a la página de detalles) */}
+                  <Link to={`/game/${game.appid}`}>
+                    <Button variant="outline" size="lg">
+                      <Info className="w-5 h-5" />
+                      Más información
+                    </Button>
+                  </Link>
 
                 </motion.div>
               </motion.div>
@@ -132,22 +141,6 @@ const HeroSlide = ({ games, loading }) => {
           </SwiperSlide>
         ))}
       </Swiper>
-
-      {/* Indicador de scroll (opcional) */}
-      <motion.div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 hidden md:flex items-center gap-2 text-white/60 text-sm"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        <span>Desliza para más</span>
-        <motion.div
-          animate={{ x: [0, 5, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-        >
-          →
-        </motion.div>
-      </motion.div>
     </div>
   );
 };

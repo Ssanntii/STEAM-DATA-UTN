@@ -1,28 +1,22 @@
 import { useEffect, useState } from "react";
 import HeroSlide from "../components/HeroSlide";
-import GameGrid from "../components/GameGrid";
 import useGamesStore from "../hooks/useGamesStore";
 import GameCard from "../components/GameCard";
 import ViewToggle from "../components/ui/ViewToggle";
 
-function HomePage({ games }) {
-  const [viewMode, setViewMode] = useState("grid");
+function HomePage({ games, viewMode }) {
+
+  // Determinamos las clases del contenedor según el viewMode
+  const containerClasses = viewMode === "grid"
+    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8" // Clases para la vista de grilla
+    : "flex flex-col gap-4"; // Clases para la vista de lista
 
   return (
-    <div>
-      <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-
-      <div
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-3 gap-6"
-            : "flex flex-col gap-4"
-        }
-      >
-        {games.map((game) => (
-          <GameCard key={game.appid} game={game} viewMode={viewMode} />
-        ))}
-      </div>
+    <div className={containerClasses}>
+      {games.map((game) => (
+        // Asegúrate de que GameCard también se adapte a la vista de lista/grilla
+        <GameCard key={game.appid} game={game} viewMode={viewMode} />
+      ))}
     </div>
   );
 }
@@ -36,6 +30,8 @@ export default function Home() {
     fetchTopGames,
     refresh,
   } = useGamesStore();
+
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     fetchTopGames(20);
@@ -74,21 +70,24 @@ export default function Home() {
       </section>
 
       {/* Top Games con toggle */}
-      <section className="px-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="flex justify-between items-center mb-8">
+          {/* Contenedor para el texto (columna izquierda) */}
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              Top Juegos Más Jugados
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              Los juegos con más jugadores activos ahora mismo
-            </p>
+              <h2 className="text-3xl font-bold text-white">
+                  Top Juegos Más Jugados
+              </h2>
+              <p className="text-lg text-gray-400">
+                  Los juegos con más jugadores activos ahora mismo
+              </p>
           </div>
-        </div>
 
-        {/* 🔹 Acá usamos HomePage */}
-        {!loading && topGames.length > 0 && <HomePage games={topGames} />}
-      </section>
+          {/* Contenedor para el toggle (columna derecha) */}
+          {/* Pasamos las props necesarias al componente ViewToggle */}
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+      </div>
+
+      {/* Pasamos la variable de estado viewMode al componente HomePage */}
+      {!loading && topGames.length > 0 && <HomePage games={topGames} viewMode={viewMode} />}
 
       {/* Stats Section */}
       {!loading && topGames.length > 0 && (

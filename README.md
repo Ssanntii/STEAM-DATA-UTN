@@ -9,6 +9,7 @@
 
 ### UI
 - Botón de volver al inicio implementado en GameDetails y 404, necesita estilarse para modo claro/oscuro.
+- Crear un componente modal. Para ver las capturas de pantalla en la misma página con Swiper para crear los slides, similar al HeroSlide.
 
 ### Charts
 - Implementar los charts de cada juego con históricos reales.

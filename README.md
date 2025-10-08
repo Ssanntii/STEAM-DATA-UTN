@@ -1,5 +1,21 @@
 # Steam Data UTN
 
+## Pendientes
+
+### Páginas
+- Crear la página Top Sellers. Cambiar a Más Vendidos.
+- Crear la página Offers.
+- Adaptar GameDetails para modo claro/oscuro. Debe ser responsive también.
+
+### UI
+- Botón de volver al inicio implementado en GameDetails y 404, necesita estilarse para modo claro/oscuro.
+
+### Charts
+- Implementar los charts de cada juego con históricos reales.
+
+### Estructura
+- La barra de búsqueda no es funcional, debe programarse.
+
 ## Avances
 
 ### API
@@ -11,11 +27,14 @@
 - La estructura general está bastante definida.
 - Hay que ir jugando un poco con los componentes para adaptarlos mejor. No se comprobó si son responsive.
 - Seguramente faltan componentes como un Modal para ver las capturas, todos los componentes que se necesiten se pueden agregar.
+- Se agregó un ViewToggle para cambiar entre List y Grid en Home.
+- Se agregó GameList para mostrar los juegos por lista.
 
 ### Rutas
 - Existen 5 rutas, una de inicio, detalle de un juego específico, más vendidos, juegos en oferta y una ruta que envuelva todas las otras que no existen y arroje un 404 no encontrado.
 - La ruta de más vendidos y ofertas(deals, mal llamado) podría ser una sola ruta, en donde se pueda filtrar por más vendidos en oferta por ejemplo.
 - Las rutas no están 100% definidas, están sujetas a cambio así que pueden eliminarse como añadirse alguna que otra.
+- Se agregó la ruta 404 que envuelve todas las rutas inexistentes.
 
 ### Páginas
 - Con las páginas sucede lo mismo que con las rutas, la idea es que por cada ruta exista un componente página y viceversa, donde dentro de cada una se consumen los componentes para formar esa misma.
@@ -34,11 +53,9 @@
 - Hay varios hooks personalizados que hay que revisar exactamente qué hacen y si son del todo necesarios.
 
 ### Contextos
-- Por el momento hay creados 2 context, uno para el tema claro/oscuro y otro para el lenguaje dentro de la página, la idea es solo ES/EN.
-- El segundo contexto es opcional, puede estar como no. Si genera mucho problema se lo puede sacar.
-- Los contextos deberían dejarse para lo último de igual manera.
+- Queda solo 1, es el de ThemeContext, ya implementado en varios componentes.
 
 ### UI
 - Existe una carpeta de UI donde están guardados dos componentes, un botón y un input, para usarlos en los demás componentes.
-- El problema es que creo que no se usan, hay que verificar.
-- También hay que verificar si están correctamente estilados o si falta añadir o quitar algo de estos componentes.
+- Se usan en varios componentes
+- Fueron correctamente estilados.

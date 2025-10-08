@@ -26,7 +26,6 @@ const Navbar = () => {
                     >
                         <Gamepad2 className="w-6 h-6 text-steam-accent" />
                         <span className="hidden sm:inline">STEAM DATA</span>
-                        <span className="sm:hidden">SD</span>
                     </Link>
 
                     {/* Buscador */}
@@ -57,7 +56,7 @@ const Navbar = () => {
                         </Link>
                         
                         <Link 
-                            to="/deals" 
+                            to="/offers" 
                             className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
                                      hover:bg-steam-green/10 hover:border-steam-green/50 transition-all duration-200
                                      text-sm font-medium group"

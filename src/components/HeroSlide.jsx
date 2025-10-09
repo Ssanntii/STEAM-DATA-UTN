@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation, Autoplay } from "swiper/modules";
+
 import { motion } from "framer-motion";
+
 import { Play, Info, Users, TrendingUp } from "lucide-react";
+
 import Button from "../components/ui/Button"
 
 const HeroSkeleton = () => (
@@ -40,14 +44,16 @@ const HeroSlide = ({ games, loading }) => {
           <SwiperSlide key={game.appid}>
             <motion.div
               className="relative w-full h-full flex items-end justify-start bg-cover bg-center"
-              style={{ 
-                backgroundImage: `url(${game.background})`,
-                backgroundColor: '#0f1419'
+              style={{
+              backgroundImage: `url(${game.background_raw || game.background})`,
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Overlay personalizado con gradiente */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
               
               {/* Contenido */}
               <motion.div 
@@ -59,7 +65,7 @@ const HeroSlide = ({ games, loading }) => {
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <motion.span 
-                    className="inline-flex items-center gap-1.5 text-xs md:text-sm font-bold text-white bg-primary/20 border border-primary/30 backdrop-blur-sm px-3 py-1.5 rounded-full"
+                    className="inline-flex items-center gap-1.5 text-xs md:text-sm font-bold text-white bg-blue-600/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.3, type: "spring" }}
@@ -70,13 +76,13 @@ const HeroSlide = ({ games, loading }) => {
                   
                   {game.players && (
                     <motion.span 
-                      className="inline-flex items-center gap-1.5 text-xs md:text-sm text-gray-300 glass px-3 py-1.5 rounded-full"
+                      className="inline-flex items-center gap-1.5 text-xs md:text-sm text-white glass px-3 py-1.5 rounded-full shadow-lg"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.4, type: "spring" }}
                     >
                       <Users className="w-3.5 h-3.5" />
-                      {game.players.toLocaleString()} jugadores
+                      {game.players} jugadores
                     </motion.span>
                   )}
                 </div>
@@ -93,7 +99,7 @@ const HeroSlide = ({ games, loading }) => {
                 
                 {/* Descripción */}
                 <motion.p 
-                  className="text-base md:text-lg text-gray-200 leading-relaxed line-clamp-3 mb-6"
+                  className="text-base md:text-lg text-gray-100 leading-relaxed line-clamp-3 mb-6 drop-shadow-lg"
                   initial={{ x: -30, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
@@ -117,7 +123,7 @@ const HeroSlide = ({ games, loading }) => {
                     <Button 
                       variant="primary" 
                       size="lg"
-                      className="font-semibold"
+                      className="font-semibold shadow-xl"
                     >
                       <Play className="w-5 h-5" fill="currentColor" />
                       Jugar ahora
@@ -126,17 +132,16 @@ const HeroSlide = ({ games, loading }) => {
 
                   {/* Botón "Más información" (enlace interno a la página de detalles) */}
                   <Link to={`/game/${game.appid}`}>
-                    <Button variant="outline" size="lg">
+                    <Button variant="outline" size="lg" className="shadow-xl backdrop-blur-sm">
                       <Info className="w-5 h-5" />
                       Más información
                     </Button>
                   </Link>
-
                 </motion.div>
               </motion.div>
 
               {/* Efecto de brillo sutil */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 via-transparent to-purple-600/10 pointer-events-none" />
             </motion.div>
           </SwiperSlide>
         ))}

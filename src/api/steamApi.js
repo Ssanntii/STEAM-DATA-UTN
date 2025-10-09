@@ -183,6 +183,7 @@ const steamApi = {
             header_image: details.header_image,
             capsule_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`,
             background: details.background || details.background_raw,
+            background_raw: details.background_raw,
             image: details.header_image,
             price: details.is_free ? 'Gratis' : details.price_overview?.final_formatted || 'N/A',
             release_date: details.release_date?.date || 'TBA',

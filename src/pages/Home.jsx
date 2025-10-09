@@ -5,7 +5,6 @@ import GameCard from "../components/GameCard";
 import ViewToggle from "../components/ui/ViewToggle";
 
 function HomePage({ games, viewMode }) {
-
   // Determinamos las clases del contenedor según el viewMode
   const containerClasses = viewMode === "grid"
     ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8" // Clases para la vista de grilla

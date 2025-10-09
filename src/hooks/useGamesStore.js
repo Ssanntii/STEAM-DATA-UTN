@@ -8,7 +8,7 @@ const useGamesStore = create(
       // State
       topGames: [],
       featuredGames: [],
-      dealsGames: [],
+      offersGames: [],
       gameDetailsCache: {}, // Cache de detalles de juegos individuales
       loading: false,
       error: null,
@@ -70,14 +70,14 @@ const useGamesStore = create(
         }
       },
 
-      // Fetch deals (Ofertas)
-      fetchDeals: async () => {
+      // Fetch offers (Ofertas)
+      fetchOffers: async () => {
         try {
           set({ loading: true, error: null });
           const response = await steamApi.getFeatured();
           const games = response.specials?.items || [];
           
-          set({ dealsGames: games, loading: false });
+          set({ offersGames: games, loading: false });
           return games;
         } catch (error) {
           set({ error: error.message, loading: false });
@@ -86,28 +86,18 @@ const useGamesStore = create(
       },
 
       // Get o fetch game details con cache
-      getGameDetails: async (appId, forceRefresh = false) => {
-        const { gameDetailsCache } = get();
-
-        // Verificar cache
-        if (gameDetailsCache[appId] && !forceRefresh) {
-          console.log(`📦 Usando detalles del cache para juego ${appId}`);
-          return gameDetailsCache[appId];
-        }
-
+      getGameDetails: async (id) => {
+        set({ loading: true, error: null });
         try {
-          set({ loading: true, error: null });
-          const details = await steamApi.getAppDetails(appId);
+          const details = await steamApi.getAppDetails(id);
+          const reviews = steamApi.getAppReviewsSummary(details);
 
-          // Guardar en cache
-          set((state) => ({
-            gameDetailsCache: {
-              ...state.gameDetailsCache,
-              [appId]: details
-            },
-            loading: false
-          }));
+          if (reviews) {
+            details.review_summary = reviews.score_desc;
+            details.review_percent = reviews.score_percent;
+          }
 
+          set({ gameDetails: details, loading: false });
           return details;
         } catch (error) {
           set({ error: error.message, loading: false });
@@ -115,11 +105,13 @@ const useGamesStore = create(
         }
       },
 
+
+
       // Limpiar cache
       clearCache: () => set({ 
         topGames: [], 
         featuredGames: [],
-        dealsGames: [],
+        offersGames: [],
         gameDetailsCache: {},
         lastFetch: null 
       }),
@@ -135,7 +127,7 @@ const useGamesStore = create(
       partialize: (state) => ({
         topGames: state.topGames,
         featuredGames: state.featuredGames,
-        dealsGames: state.dealsGames,
+        offersGames: state.offersGames,
         gameDetailsCache: state.gameDetailsCache,
         lastFetch: state.lastFetch,
       }),

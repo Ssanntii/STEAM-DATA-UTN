@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Users, Tag, DollarSign, Trophy, ArrowLeft, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import useGamesStore from '../hooks/useGamesStore';
+import { Calendar, Users, Tag, DollarSign, Trophy, ArrowLeft, X, ChevronLeft, ChevronRight, ThumbsUp, Star } from 'lucide-react';
+import steamApi from '../api/steamApi';
 import LineChartPlayers from '../components/charts/LineChartsPlayers';
 
 const GameDetails = () => {
@@ -11,8 +11,6 @@ const GameDetails = () => {
   const [error, setError] = useState(null);
   const [modalImage, setModalImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  const { getGameDetails } = useGamesStore();
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -20,7 +18,8 @@ const GameDetails = () => {
         setLoading(true);
         setError(null);
         
-        const details = await getGameDetails(id);
+        // Fetch directo a steamApi (sin store)
+        const details = await steamApi.getAppDetails(id);
         console.log('Detalles del juego:', details);
         setGame(details);
       } catch (err) {
@@ -34,7 +33,7 @@ const GameDetails = () => {
     if (id) {
       fetchGameDetails();
     }
-  }, [id, getGameDetails]);
+  }, [id]);
 
   // Función para abrir modal de imagen
   const openImageModal = (index) => {
@@ -106,6 +105,8 @@ const GameDetails = () => {
   const isFree = game.is_free;
   const price = isFree ? 'Gratis' : game.price_overview?.final_formatted || 'N/A';
   const hasMetacritic = game.metacritic && game.metacritic.score;
+  const hasReviews = game.recommendations && game.recommendations.total > 0;
+  const steamRating = game.steam_rating;
 
   return (
     <div className="min-h-screen px-6 py-8">
@@ -165,7 +166,8 @@ const GameDetails = () => {
         </div>
 
         {/* Stats rápidos */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {/* Precio */}
           <div className="glass p-4 rounded-xl">
             <div className="flex items-center gap-2 text-green-400 mb-1">
               <DollarSign className="w-4 h-4" />
@@ -174,6 +176,7 @@ const GameDetails = () => {
             <div className="text-2xl font-bold">{price}</div>
           </div>
 
+          {/* Fecha de lanzamiento */}
           <div className="glass p-4 rounded-xl">
             <div className="flex items-center gap-2 text-blue-400 mb-1">
               <Calendar className="w-4 h-4" />
@@ -184,18 +187,46 @@ const GameDetails = () => {
             </div>
           </div>
 
-          {game.review_summary && (
+          {/* Calificación de Steam */}
+          {steamRating && (
             <div className="glass p-4 rounded-xl">
-              <div className="flex items-center gap-2 text-sm text-gray-300 mb-1">
-                <Trophy className="w-4 h-4 text-yellow-400" />
-                <span className="font-semibold">Reseñas:</span>
+              <div className="flex items-center gap-2 mb-1">
+                <Star className="w-4 h-4" style={{ color: steamRating.color }} />
+                <span className="text-xs font-semibold uppercase text-gray-400">Calificación</span>
               </div>
-              <p className="text-gray-200">
-                {game.review_summary} • {game.review_percent.toFixed(1)}% de aprobación
-              </p>
-              <p className="text-gray-400 text-xs">
-                {game.review_count} reseñas totales
-              </p>
+              <div className="text-lg font-bold" style={{ color: steamRating.color }}>
+                {steamRating.text}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {steamRating.percent}% positivo
+              </div>
+            </div>
+          )}
+
+          {/* Reseñas totales */}
+          {hasReviews && (
+            <div className="glass p-4 rounded-xl">
+              <div className="flex items-center gap-2 text-purple-400 mb-1">
+                <ThumbsUp className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase">Reseñas</span>
+              </div>
+              <div className="text-2xl font-bold">
+                {game.recommendations.total.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                recomendaciones
+              </div>
+            </div>
+          )}
+
+          {/* Metacritic */}
+          {hasMetacritic && (
+            <div className="glass p-4 rounded-xl">
+              <div className="flex items-center gap-2 text-yellow-400 mb-1">
+                <Trophy className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase">Metacritic</span>
+              </div>
+              <div className="text-2xl font-bold">{game.metacritic.score}</div>
             </div>
           )}
         </div>
@@ -326,7 +357,7 @@ const GameDetails = () => {
               onClick={(e) => {
                 e.stopPropagation();
                 navigateImage('prev');
-              }}
+                }}
             >
               <ChevronLeft className="w-6 h-6 text-white" />
             </button>

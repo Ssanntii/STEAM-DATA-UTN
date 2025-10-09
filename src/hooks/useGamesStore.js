@@ -5,11 +5,10 @@ import steamApi from '../api/steamApi';
 const useGamesStore = create(
   persist(
     (set, get) => ({
-      // State
+      // State (sin gameDetailsCache)
       topGames: [],
       featuredGames: [],
       offersGames: [],
-      gameDetailsCache: {}, // Cache de detalles de juegos individuales
       loading: false,
       error: null,
       lastFetch: null,
@@ -24,9 +23,8 @@ const useGamesStore = create(
       fetchTopGames: async (limit = 20, forceRefresh = false) => {
         const { topGames, lastFetch } = get();
         const now = Date.now();
-        const CACHE_TIME = 5 * 60 * 1000; // 5 minutos
+        const CACHE_TIME = 5 * 60 * 1000;
 
-        // Si ya hay datos y no han pasado 5 minutos, usar cache
         if (topGames.length > 0 && lastFetch && (now - lastFetch < CACHE_TIME) && !forceRefresh) {
           console.log('📦 Usando datos del cache');
           return topGames;
@@ -85,34 +83,11 @@ const useGamesStore = create(
         }
       },
 
-      // Get o fetch game details con cache
-      getGameDetails: async (id) => {
-        set({ loading: true, error: null });
-        try {
-          const details = await steamApi.getAppDetails(id);
-          const reviews = steamApi.getAppReviewsSummary(details);
-
-          if (reviews) {
-            details.review_summary = reviews.score_desc;
-            details.review_percent = reviews.score_percent;
-          }
-
-          set({ gameDetails: details, loading: false });
-          return details;
-        } catch (error) {
-          set({ error: error.message, loading: false });
-          throw error;
-        }
-      },
-
-
-
       // Limpiar cache
       clearCache: () => set({ 
         topGames: [], 
         featuredGames: [],
         offersGames: [],
-        gameDetailsCache: {},
         lastFetch: null 
       }),
 
@@ -123,12 +98,11 @@ const useGamesStore = create(
       }
     }),
     {
-      name: 'steam-games-storage', // Nombre en localStorage
+      name: 'steam-games-storage',
       partialize: (state) => ({
         topGames: state.topGames,
         featuredGames: state.featuredGames,
         offersGames: state.offersGames,
-        gameDetailsCache: state.gameDetailsCache,
         lastFetch: state.lastFetch,
       }),
     }

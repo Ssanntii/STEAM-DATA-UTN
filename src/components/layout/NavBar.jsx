@@ -2,7 +2,7 @@ import { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ThemeContext } from '../../contexts/ThemeContext'
 import useDebounce from '../../hooks/useDebounce'
-import { Search, Sun, Moon, TrendingUp, Tag, Gamepad2 } from 'lucide-react'
+import { Search, Sun, Moon, Gift, DollarSign, Gamepad2, Rocket } from 'lucide-react'
 
 const Navbar = () => {
     const { darkMode, setDarkMode } = useContext(ThemeContext)
@@ -51,7 +51,7 @@ const Navbar = () => {
                                         hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-200
                                         text-sm font-medium group"
                             >
-                                <Gamepad2 className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
+                                <Rocket className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
                                 <span className="hidden md:inline">Más Jugados</span>
                             </Link>
 
@@ -61,7 +61,7 @@ const Navbar = () => {
                                         hover:bg-primary/10 hover:border-primary/50 transition-all duration-200
                                         text-sm font-medium group"
                             >
-                                <TrendingUp className="w-4 h-4 group-hover:text-primary transition-colors" />
+                                <DollarSign className="w-4 h-4 group-hover:text-primary transition-colors" />
                                 <span className="hidden md:inline">Top Sellers</span>
                             </Link>
                             
@@ -71,7 +71,7 @@ const Navbar = () => {
                                         hover:bg-steam-green/10 hover:border-steam-green/50 transition-all duration-200
                                         text-sm font-medium group"
                             >
-                                <Tag className="w-4 h-4 group-hover:text-steam-green transition-colors" />
+                                <Gift className="w-4 h-4 group-hover:text-steam-green transition-colors" />
                                 <span className="hidden md:inline">Ofertas</span>
                             </Link>
 

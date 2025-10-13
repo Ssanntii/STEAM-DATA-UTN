@@ -5,7 +5,7 @@ import steamApi from '../api/steamApi';
 const useGamesStore = create(
   persist(
     (set, get) => ({
-      // State (sin gameDetailsCache)
+      // State
       topGames: [],
       featuredGames: [],
       offersGames: [],
@@ -19,21 +19,25 @@ const useGamesStore = create(
       setError: (error) => set({ error }),
       setProgress: (progress) => set({ progress }),
 
-      // Fetch top games (con cache de 5 minutos)
-      fetchTopGames: async (limit = 20, forceRefresh = false) => {
+      // ✅ CORREGIDO: fetchTopGames ahora recibe options como objeto
+      fetchTopGames: async (limit = 20, options = {}) => {
         const { topGames, lastFetch } = get();
+        const { forceRefresh = false } = options;
         const now = Date.now();
         const CACHE_TIME = 5 * 60 * 1000;
 
+        // Si hay cache válido y NO es force refresh, usar cache
         if (topGames.length > 0 && lastFetch && (now - lastFetch < CACHE_TIME) && !forceRefresh) {
-          console.log('📦 Usando datos del cache');
+          console.log('📦 Usando datos del cache de Zustand');
           return topGames;
         }
 
         try {
           set({ loading: true, error: null, progress: 0 });
 
+          // ✅ Ahora SÍ pasamos forceRefresh a la API
           const games = await steamApi.getTopGamesWithDetails(limit, {
+            forceRefresh, // 👈 ESTO ES LO QUE FALTABA
             onProgress: ({ current, total }) => {
               set({ progress: Math.round((current / total) * 100) });
             }
@@ -84,17 +88,20 @@ const useGamesStore = create(
       },
 
       // Limpiar cache
-      clearCache: () => set({ 
-        topGames: [], 
-        featuredGames: [],
-        offersGames: [],
-        lastFetch: null 
-      }),
+      clearCache: () => {
+        steamApi.clearCache(); // 👈 También limpiar cache de la API
+        set({ 
+          topGames: [], 
+          featuredGames: [],
+          offersGames: [],
+          lastFetch: null 
+        });
+      },
 
-      // Refrescar datos
+      // Refrescar datos (ahora usa la función correcta)
       refresh: async () => {
         const { fetchTopGames } = get();
-        await fetchTopGames(20, true);
+        await fetchTopGames(20, { forceRefresh: true });
       }
     }),
     {

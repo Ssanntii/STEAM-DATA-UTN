@@ -45,25 +45,35 @@ const Navbar = () => {
 
                     {/* Navigation */}
                     <nav className="flex items-center gap-2">
-                        <Link 
-                            to="/top-sellers" 
-                            className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
-                                     hover:bg-primary/10 hover:border-primary/50 transition-all duration-200
-                                     text-sm font-medium group"
-                        >
-                            <TrendingUp className="w-4 h-4 group-hover:text-primary transition-colors" />
-                            <span className="hidden md:inline">Top Sellers</span>
-                        </Link>
-                        
-                        <Link 
-                            to="/offers" 
-                            className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
-                                     hover:bg-steam-green/10 hover:border-steam-green/50 transition-all duration-200
-                                     text-sm font-medium group"
-                        >
-                            <Tag className="w-4 h-4 group-hover:text-steam-green transition-colors" />
-                            <span className="hidden md:inline">Ofertas</span>
-                        </Link>
+                            <Link 
+                                to="/most-played" 
+                                className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
+                                        hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-200
+                                        text-sm font-medium group"
+                            >
+                                <Gamepad2 className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
+                                <span className="hidden md:inline">Más Jugados</span>
+                            </Link>
+
+                            <Link 
+                                to="/top-sellers" 
+                                className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
+                                        hover:bg-primary/10 hover:border-primary/50 transition-all duration-200
+                                        text-sm font-medium group"
+                            >
+                                <TrendingUp className="w-4 h-4 group-hover:text-primary transition-colors" />
+                                <span className="hidden md:inline">Top Sellers</span>
+                            </Link>
+                            
+                            <Link 
+                                to="/offers" 
+                                className="flex items-center gap-2 glass px-4 py-2 rounded-xl 
+                                        hover:bg-steam-green/10 hover:border-steam-green/50 transition-all duration-200
+                                        text-sm font-medium group"
+                            >
+                                <Tag className="w-4 h-4 group-hover:text-steam-green transition-colors" />
+                                <span className="hidden md:inline">Ofertas</span>
+                            </Link>
 
                         {/* Theme Toggle */}
                         <button

@@ -10,13 +10,13 @@ const Button = forwardRef(({
 }, ref) => {
     
     const variants = {
-        default: 'glass hover:bg-white/10 text-foreground border-border',
-        primary: 'bg-primary hover:bg-primary/90 text-primary-foreground border-primary/50 shadow-lg shadow-primary/20',
+        default: 'glass hover:bg-white/10 dark:hover:bg-white/10 text-foreground border-border',
+        primary: 'bg-primary hover:bg-primary/90 text-white border-primary/50 shadow-lg shadow-primary/20',
         secondary: 'bg-muted hover:bg-muted/80 text-muted-foreground border-muted',
         success: 'bg-steam-green hover:bg-steam-green/90 text-white border-steam-green/50 shadow-lg shadow-steam-green/20',
         danger: 'bg-steam-red hover:bg-steam-red/90 text-white border-steam-red/50 shadow-lg shadow-steam-red/20',
-        ghost: 'hover:bg-white/5 text-foreground border-transparent',
-        outline: 'bg-transparent hover:bg-white/5 text-foreground border-border hover:border-primary/50',
+        ghost: 'hover:bg-primary/10 dark:hover:bg-white/5 text-foreground border-transparent',
+        outline: 'bg-transparent hover:bg-white/10 text-white border-white/30 hover:border-white/50 backdrop-blur-sm shadow-xl',
     }
 
     const sizes = {

@@ -51,9 +51,10 @@
   --input: 214.3 31.8% 91.4%;
   --ring: 221.2 83.2% 53.3%;
   
-  /* Glass morphism */
-  --glass-bg: rgba(255, 255, 255, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  /* Glass morphism para modo claro */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
 }
 
 .dark {
@@ -73,6 +74,7 @@
   /* Glass morphism para dark mode */
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* ============================================
@@ -95,20 +97,24 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-950 dark:bg-gray-950;
+  @apply bg-gray-100 dark:bg-gray-950;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-700 dark:bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors;
+  @apply bg-gray-400 dark:bg-gray-700 rounded-lg hover:bg-gray-500 dark:hover:bg-gray-600 transition-colors;
 }
 
 ::-webkit-scrollbar-corner {
-  @apply bg-gray-950 dark:bg-gray-950;
+  @apply bg-gray-100 dark:bg-gray-950;
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175) rgb(243 244 246);
+}
+
+.dark * {
   scrollbar-color: rgb(55 65 81) rgb(3 7 18);
 }
 
@@ -151,12 +157,13 @@ body {
    UTILIDADES NECESARIAS
    ============================================ */
 
-/* Glass morphism - usa variables CSS */
+/* Glass morphism - adaptado para claro/oscuro */
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 6px -1px var(--glass-shadow);
 }
 
 /* Focus styles mejorados */

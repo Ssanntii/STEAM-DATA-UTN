@@ -123,7 +123,7 @@ const GameDetails = () => {
         {/* Header con imagen de fondo */}
         <div className="relative rounded-2xl overflow-hidden">
           <div
-            className="h-96 bg-cover bg-center"
+            className="h-96 bg-cover"
             style={{
               backgroundImage: `url(${game.background_raw || game.background})`,
             }}

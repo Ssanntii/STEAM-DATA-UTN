@@ -191,6 +191,16 @@ const Navbar = () => {
 
                     {/* Mobile Controls */}
                     <div className="flex md:hidden items-center gap-2">
+                        {/* Menu Toggle */}
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="p-2.5 rounded-xl glass hover:bg-primary/10 hover:border-primary/50
+                                     transition-all duration-200 flex-shrink-0"
+                            aria-label="Abrir menú"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+
                         {/* Theme Toggle - Mobile */}
                         <button
                             onClick={() => setDarkMode(!darkMode)}
@@ -203,16 +213,6 @@ const Navbar = () => {
                             ) : (
                                 <Moon className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
                             )}
-                        </button>
-
-                        {/* Menu Toggle */}
-                        <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="p-2.5 rounded-xl glass hover:bg-primary/10 hover:border-primary/50
-                                     transition-all duration-200 flex-shrink-0"
-                            aria-label="Abrir menú"
-                        >
-                            <Menu className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -262,11 +262,6 @@ const Navbar = () => {
                             </Link>
                         ))}
                     </nav>
-
-                    {/* Footer info */}
-                    <div className="pb-8 text-center text-sm text-muted-foreground px-4">
-                        <p>Explora el mundo de Steam</p>
-                    </div>
                 </div>
             </div>
         </header>

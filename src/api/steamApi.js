@@ -422,6 +422,105 @@ const steamApi = {
     }
   },
 
+  // ========== BÚSQUEDA AVANZADA CON FILTROS ==========
+  // 👇 ESTA FUNCIÓN AHORA ESTÁ DENTRO DEL OBJETO steamApi
+  searchGamesAdvanced: async (term, options = {}) => {
+    const {
+      limit = 10,
+      includeDetails = false,
+      onlyGames = true,
+      includePlayers = false // 👈 NUEVO: Controlar si se incluyen jugadores
+    } = options;
+
+    try {
+      const response = await storeClient.get('storesearch', {
+        params: {
+          term,
+          l: 'spanish',
+          cc: 'AR'
+        }
+      });
+
+      let items = response?.items || [];
+      
+      // Filtrar solo juegos (type debe ser "game")
+      if (onlyGames) {
+        items = items.filter(item => {
+          const name = item.name.toLowerCase();
+          const itemType = item.type?.toLowerCase() || '';
+          
+          // Excluir DLCs, soundtracks, bundles, etc.
+          const isDLC = name.includes('dlc') || 
+                        name.includes('soundtrack') || 
+                        name.includes('ost') ||
+                        itemType === 'dlc' ||
+                        itemType === 'music';
+          
+          const isGame = itemType === 'game' || itemType === 'app';
+          
+          return isGame && !isDLC;
+        });
+      }
+
+      // Limitar resultados
+      items = items.slice(0, limit);
+
+      // Si se piden detalles completos
+      if (includeDetails && items.length > 0) {
+        const appIds = items.map(item => item.id);
+        const detailedGames = await steamApi.getMultipleGameDetails(appIds, {
+          concurrency: 3,
+          limit: items.length,
+          includePlayers: includePlayers // 👈 Pasar el parámetro
+        });
+        
+        return detailedGames;
+      }
+
+      // ✅ SOLUCIÓN: Mejorar el manejo de precios
+      return items.map(item => {
+        let priceDisplay = 'N/A';
+        
+        // La API devuelve el precio de diferentes formas
+        if (item.price) {
+          // Caso 1: price.final_formatted existe (precio con formato)
+          if (item.price.final_formatted) {
+            priceDisplay = item.price.final_formatted;
+          }
+          // Caso 2: price.final existe (precio en centavos)
+          else if (item.price.final !== undefined) {
+            if (item.price.final === 0) {
+              priceDisplay = 'Gratis';
+            } else {
+              // Convertir de centavos a pesos argentinos
+              const priceInARS = (item.price.final / 100).toFixed(2);
+              priceDisplay = `ARS$ ${priceInARS}`;
+            }
+          }
+          // Caso 3: Si price existe pero es 0
+          else if (item.price === 0) {
+            priceDisplay = 'Gratis';
+          }
+        }
+        // Caso 4: No hay información de precio pero sabemos que es gratis
+        else if (item.is_free === true) {
+          priceDisplay = 'Gratis';
+        }
+
+        return {
+          appid: item.id,
+          name: item.name,
+          image: item.tiny_image || `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/capsule_184x69.jpg`,
+          price: priceDisplay
+        };
+      });
+
+    } catch (error) {
+      console.error('Error en searchGamesAdvanced:', error);
+      return [];
+    }
+  },
+
   // ========== UTILIDAD ==========
   clearCache: () => {
     cache.data.clear()

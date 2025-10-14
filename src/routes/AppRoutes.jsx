@@ -7,6 +7,7 @@ import GameDetails from '../pages/GameDetails'
 import TopSellers from '../pages/TopSellers'
 import Offers from '../pages/Offers'
 import MostPlayed from '../pages/MostPlayed'
+import SearchResults from '../pages/SearchResults'
 import NotFoundPage from '../pages/NotFoundPage'
 
 const AppRoutes = () => {
@@ -17,6 +18,7 @@ const AppRoutes = () => {
     <Route path="/top-sellers" element={<MainLayout><TopSellers/></MainLayout>} />
     <Route path="/offers" element={<MainLayout><Offers/></MainLayout>} />
     <Route path="/most-played" element={<MainLayout><MostPlayed /></MainLayout>} />
+    <Route path="/search" element={<MainLayout><SearchResults /></MainLayout>} />
     <Route path="*" element={<MainLayout><NotFoundPage /></MainLayout>} />
     </Routes>
     )

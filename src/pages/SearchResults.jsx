@@ -21,12 +21,12 @@ const SearchResults = () => {
             setError(null)
 
             try {
-                // ✅ CAMBIO: Ahora pedimos includeDetails: true para obtener descripciones
+                // ✅ Traer hasta 50 juegos incluyendo DLCs
                 const games = await steamApi.searchGamesAdvanced(query, {
-                    limit: 20, // Reducir a 20 porque pedimos detalles completos
-                    includeDetails: true, // 👈 ESTO ES LO IMPORTANTE
-                    onlyGames: true,
-                    includePlayers: false // 👈 NO incluir jugadores en búsqueda
+                    limit: 50, // 👈 Aumentado a 50 juegos
+                    includeDetails: true,
+                    onlyGames: false, // 👈 Incluir DLCs y todo
+                    includePlayers: false
                 })
                 
                 setResults(games)
@@ -42,24 +42,24 @@ const SearchResults = () => {
     }, [query])
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
                 <Link 
                     to="/" 
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-3 sm:mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Volver al inicio
                 </Link>
                 
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-3">
-                        <Search className="w-8 h-8 text-primary flex-shrink-0" />
-                        <div>
-                            <h1 className="text-3xl font-bold">Resultados de búsqueda</h1>
-                            <p className="text-muted-foreground mt-1">
-                                {query ? `Mostrando resultados para "${query}"` : 'Sin término de búsqueda'}
+                <div className="flex items-start justify-between gap-3 sm:gap-4 flex-wrap">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+                        <Search className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0 mt-1" />
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold">Resultados de búsqueda</h1>
+                            <p className="text-sm text-muted-foreground mt-1 truncate">
+                                {query ? `Resultados para "${query}"` : 'Sin término de búsqueda'}
                             </p>
                         </div>
                     </div>
@@ -99,9 +99,9 @@ const SearchResults = () => {
                                 Se encontraron {results.length} juegos
                             </p>
                             
-                            {/* Grid View */}
+                            {/* Grid View - Responsive */}
                             {viewMode === 'grid' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                                     {results.map((game) => (
                                         <GameCard 
                                             key={game.appid} 

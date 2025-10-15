@@ -200,7 +200,7 @@ const Navbar = () => {
                         >
                             <Menu className="w-5 h-5" />
                         </button>
-
+                        
                         {/* Theme Toggle - Mobile */}
                         <button
                             onClick={() => setDarkMode(!darkMode)}
@@ -219,51 +219,54 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Menu Overlay */}
-            <div
-                className={`${
-                    isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-                } md:hidden fixed top-0 left-0 right-0 bottom-0 bg-[#0a0e27] z-[100] transition-transform duration-300 ease-in-out`}
-            >
-                <div className="h-full flex flex-col">
-                    {/* Header del menú */}
-                    <div className="flex items-center justify-between h-16 border-b border-border/50 px-4">
-                        <Link 
-                            to="/" 
-                            onClick={handleLinkClick}
-                            className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-steam-accent to-primary bg-clip-text text-transparent"
-                        >
-                            <Gamepad2 className="w-6 h-6 text-steam-accent" />
-                            <span>STEAM DATA</span>
-                        </Link>
-
-                        <button
-                            onClick={() => setIsMenuOpen(false)}
-                            className="p-2.5 rounded-xl glass hover:bg-primary/10 hover:border-primary/50
-                                     transition-all duration-200"
-                            aria-label="Cerrar menú"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    {/* Navigation Links */}
-                    <nav className="flex-1 flex flex-col items-center justify-center gap-6 py-8 px-4">
-                        {navLinks.map((link) => (
+            {isMenuOpen && (
+                <div className="md:hidden fixed top-0 left-0 w-full h-screen bg-white dark:bg-[#0a0e27] z-[100] animate-in slide-in-from-right duration-300">
+                    <div className="h-full flex flex-col">
+                        {/* Header del menú */}
+                        <div className="flex items-center justify-between h-16 border-b border-border/50 px-4">
                             <Link 
-                                key={link.to}
-                                to={link.to}
+                                to="/" 
                                 onClick={handleLinkClick}
-                                className={`flex items-center gap-3 glass px-8 py-4 rounded-xl 
-                                    ${link.hoverColor} transition-all duration-200
-                                    text-lg font-medium group w-full max-w-xs justify-center`}
+                                className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-steam-accent to-primary bg-clip-text text-transparent"
                             >
-                                <link.icon className={`w-5 h-5 ${link.iconHoverColor} transition-colors`} />
-                                <span>{link.label}</span>
+                                <Gamepad2 className="w-6 h-6 text-steam-accent" />
+                                <span>STEAM DATA</span>
                             </Link>
-                        ))}
-                    </nav>
+
+                            <button
+                                onClick={() => setIsMenuOpen(false)}
+                                className="p-2.5 rounded-xl glass hover:bg-primary/10 hover:border-primary/50
+                                         transition-all duration-200"
+                                aria-label="Cerrar menú"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Navigation Links */}
+                        <nav className="flex-1 flex flex-col items-center justify-center gap-6 py-8 px-4">
+                            {navLinks.map((link) => (
+                                <Link 
+                                    key={link.to}
+                                    to={link.to}
+                                    onClick={handleLinkClick}
+                                    className={`flex items-center gap-3 glass px-8 py-4 rounded-xl 
+                                        ${link.hoverColor} transition-all duration-200
+                                        text-lg font-medium group w-full max-w-xs justify-center`}
+                                >
+                                    <link.icon className={`w-5 h-5 ${link.iconHoverColor} transition-colors`} />
+                                    <span>{link.label}</span>
+                                </Link>
+                            ))}
+                        </nav>
+
+                        {/* Footer info */}
+                        <div className="pb-8 text-center text-sm text-muted-foreground px-4">
+                            <p>© 2025 STEAM DATA UTN - Todos los derechos reservados.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </header>
     )
 }

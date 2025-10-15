@@ -11,6 +11,8 @@ const SearchDropdown = ({ suggestions, loading, query, onSelectGame, onClose }) 
     onClose();
   };
 
+  // ✅ CAMBIO: Solo navegar al juego específico cuando se hace CLICK
+  // El Enter ahora se maneja en el Navbar y va directo a /search
   const handleSelectGame = (game) => {
     navigate(`/game/${game.appid}`);
     onSelectGame(game);
@@ -31,6 +33,7 @@ const SearchDropdown = ({ suggestions, loading, query, onSelectGame, onClose }) 
               <button
                 key={game.appid}
                 onClick={() => handleSelectGame(game)}
+                type="button"
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/10 transition-colors duration-200 text-left group"
               >
                 {/* Imagen del juego */}
@@ -62,6 +65,7 @@ const SearchDropdown = ({ suggestions, loading, query, onSelectGame, onClose }) 
           <div className="border-t border-border/50 p-2">
             <button
               onClick={handleViewAll}
+              type="button"
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg hover:bg-primary/10 transition-colors duration-200 text-sm font-medium group"
             >
               <SearchIcon className="w-4 h-4 group-hover:text-primary transition-colors" />

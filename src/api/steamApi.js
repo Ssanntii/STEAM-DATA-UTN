@@ -1,5 +1,4 @@
 import axiosClient, { storeClient } from "./axiosClient"
-import apiConfig from "./apiConfig"
 
 export const endpoints = {
   charts: 'ISteamChartsService',

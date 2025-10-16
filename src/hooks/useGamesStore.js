@@ -179,7 +179,7 @@ const useGamesStore = create(
         }
       },
 
-      // Fetch offers (Ofertas) - VERSIÓN MEJORADA
+      // Reemplaza la función fetchOffers en tu useGamesStore.js
       fetchOffers: async (limit = 150, options = {}) => {
         const { offersGames, lastFetch } = get();
         const { forceRefresh = false } = options;
@@ -197,22 +197,35 @@ const useGamesStore = create(
 
           console.log('🔍 Obteniendo ofertas especiales...');
           const response = await steamApi.getFeatured();
+
+          console.log('📦 Respuesta COMPLETA de getFeatured:', response);
+          console.log('📦 Claves del objeto:', Object.keys(response));
           
           let offerIds = [];
           
-          // Intentar diferentes estructuras
-          if (response.specials?.items) {
-            offerIds = response.specials.items;
-          } else if (response.specials) {
-            offerIds = response.specials;
-          } else if (Array.isArray(response)) {
-            offerIds = response;
+          // ✅ SOLUCIÓN: Usar large_capsules que contiene juegos con descuentos
+          if (response.large_capsules && Array.isArray(response.large_capsules)) {
+            offerIds = response.large_capsules;
+            console.log('✅ Usando large_capsules');
+          } 
+          // Fallback: intentar con featured_win
+          else if (response.featured_win && Array.isArray(response.featured_win)) {
+            offerIds = response.featured_win;
+            console.log('✅ Usando featured_win');
+          }
+          // Último intento: cualquier array disponible
+          else {
+            const firstArrayKey = Object.keys(response).find(key => Array.isArray(response[key]));
+            if (firstArrayKey) {
+              offerIds = response[firstArrayKey];
+              console.log(`✅ Usando ${firstArrayKey}`);
+            }
           }
           
-          console.log('🎮 Ofertas encontradas:', offerIds.length);
+          console.log('🎮 Juegos encontrados:', offerIds.length);
           
           if (offerIds.length === 0) {
-            throw new Error('No se encontraron ofertas en la respuesta de Steam');
+            throw new Error('No se encontraron juegos en la respuesta de Steam');
           }
           
           // Limitar al número solicitado
@@ -224,39 +237,43 @@ const useGamesStore = create(
             try {
               const gameId = offerIds[i].id || offerIds[i].appid || offerIds[i];
               
-              console.log(`🔄 Obteniendo oferta ${i + 1}/${offerIds.length}: ${gameId}`);
+              console.log(`🔄 Obteniendo juego ${i + 1}/${offerIds.length}: ${gameId}`);
               
               const gameDetails = await steamApi.getAppDetails(gameId);
               
               if (gameDetails) {
-                // Calcular descuento
-                const originalPrice = gameDetails.price_overview?.initial || 0;
-                const finalPrice = gameDetails.price_overview?.final || 0;
+                // Verificar si tiene descuento
                 const discountPercent = gameDetails.price_overview?.discount_percent || 0;
-
-                const game = {
-                  appid: gameId,
-                  name: gameDetails.name,
-                  short_description: gameDetails.short_description || '',
-                  header_image: gameDetails.header_image,
-                  capsule_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/capsule_616x353.jpg`,
-                  background_raw: gameDetails.background_raw,
-                  image: gameDetails.header_image,
-                  price: gameDetails.price_overview?.final_formatted || 'N/A',
-                  original_price: gameDetails.price_overview?.initial_formatted || 'N/A',
-                  discount_percent: discountPercent,
-                  release_date: gameDetails.release_date?.date || 'TBA',
-                  developers: gameDetails.developers || [],
-                  publishers: gameDetails.publishers || [],
-                  genres: gameDetails.genres || [],
-                  categories: gameDetails.categories || [],
-                  platforms: gameDetails.platforms || {},
-                  metacritic: gameDetails.metacritic?.score || null,
-                  recommendations: gameDetails.recommendations?.total || 0,
-                  steam_rating: gameDetails.steam_rating,
-                };
                 
-                games.push(game);
+                // Solo agregar juegos con descuento
+                if (discountPercent > 0) {
+                  const game = {
+                    appid: gameId,
+                    name: gameDetails.name,
+                    short_description: gameDetails.short_description || '',
+                    header_image: gameDetails.header_image,
+                    capsule_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/capsule_616x353.jpg`,
+                    background_raw: gameDetails.background_raw,
+                    image: gameDetails.header_image,
+                    price: gameDetails.price_overview?.final_formatted || 'N/A',
+                    original_price: gameDetails.price_overview?.initial_formatted || 'N/A',
+                    discount_percent: discountPercent,
+                    release_date: gameDetails.release_date?.date || 'TBA',
+                    developers: gameDetails.developers || [],
+                    publishers: gameDetails.publishers || [],
+                    genres: gameDetails.genres || [],
+                    categories: gameDetails.categories || [],
+                    platforms: gameDetails.platforms || {},
+                    metacritic: gameDetails.metacritic?.score || null,
+                    recommendations: gameDetails.recommendations?.total || 0,
+                    steam_rating: gameDetails.steam_rating,
+                  };
+                  
+                  games.push(game);
+                  console.log(`✅ Oferta agregada: ${gameDetails.name} (-${discountPercent}%)`);
+                } else {
+                  console.log(`⏭️ Juego sin descuento, omitiendo: ${gameDetails.name}`);
+                }
               }
               
               // Actualizar progreso
@@ -267,17 +284,29 @@ const useGamesStore = create(
                 await new Promise(resolve => setTimeout(resolve, 100));
               }
             } catch (err) {
-              console.error(`❌ Error obteniendo oferta ${offerIds[i].id || offerIds[i]}:`, err);
+              console.error(`❌ Error obteniendo juego ${offerIds[i].id || offerIds[i]}:`, err);
             }
           }
 
           console.log(`✅ Total de ofertas obtenidas: ${games.length}`);
 
+          // Si no se encontraron juegos con descuento, mostrar mensaje
+          if (games.length === 0) {
+            set({ 
+              offersGames: [], 
+              loading: false, 
+              error: 'No se encontraron ofertas activas en este momento',
+              progress: 100 
+            });
+            return [];
+          }
+
           set({ 
             offersGames: games, 
             loading: false, 
             lastFetch: now,
-            progress: 100 
+            progress: 100,
+            error: null
           });
 
           return games;
@@ -287,7 +316,6 @@ const useGamesStore = create(
           throw error;
         }
       },
-
       // Limpiar cache
       clearCache: () => {
         steamApi.clearCache();

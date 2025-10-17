@@ -167,13 +167,35 @@ const GameDetails = () => {
 
         {/* Stats rápidos */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {/* Precio */}
+          {/* Precio con descuento */}
           <div className="glass p-4 rounded-xl">
             <div className="flex items-center gap-2 text-green-400 mb-1">
               <DollarSign className="w-4 h-4" />
               <span className="text-xs font-semibold uppercase">Precio</span>
             </div>
-            <div className="text-2xl font-bold">{price}</div>
+            
+            {/* Si hay descuento */}
+            {game.price_overview?.discount_percent > 0 ? (
+              <div className="space-y-1">
+                {/* Badge de descuento */}
+                <div className="inline-block bg-[#4c6b22] text-[#beee11] px-2 py-0.5 rounded text-xs font-bold">
+                  -{game.price_overview.discount_percent}%
+                </div>
+                {/* Precio original tachado */}
+                <div className="text-sm text-gray-500 line-through">
+                  {game.price_overview.initial_formatted}
+                </div>
+                {/* Precio con descuento */}
+                <div className="text-2xl font-bold text-[#beee11]">
+                  {game.price_overview.final_formatted}
+                </div>
+              </div>
+            ) : (
+              // Sin descuento
+              <div className="text-2xl font-bold">
+                {isFree ? 'Gratis' : price}
+              </div>
+            )}
           </div>
 
           {/* Fecha de lanzamiento */}

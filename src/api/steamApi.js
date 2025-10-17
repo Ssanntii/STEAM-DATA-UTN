@@ -240,6 +240,11 @@ const steamApi = {
           }
           
           completed++
+          
+          // ✅ EXTRAER DATOS DE DESCUENTO
+          const priceInfo = details.price_overview || {};
+          const hasDiscount = priceInfo.discount_percent > 0;
+          
           const game = {
             appid: appId,
             name: details.name,
@@ -248,7 +253,16 @@ const steamApi = {
             capsule_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`,
             background_raw: details.background_raw,
             image: details.header_image,
-            price: details.is_free ? 'Gratis' : details.price_overview?.final_formatted || 'N/A',
+            
+            // ✅ PRECIO CON MANEJO DE DESCUENTOS
+            price: details.is_free 
+              ? 'Gratis' 
+              : priceInfo.final_formatted || 'N/A',
+            
+            // ✅ NUEVOS CAMPOS DE DESCUENTO
+            original_price: hasDiscount ? priceInfo.initial_formatted : null,
+            discount_percent: priceInfo.discount_percent || 0,
+            
             release_date: details.release_date?.date || 'TBA',
             developers: details.developers || [],
             publishers: details.publishers || [],
@@ -262,7 +276,7 @@ const steamApi = {
             steam_rating: details.steam_rating,
           }
 
-          console.log(`✅ ${completed}/${total}: ${details.name}`)
+          console.log(`✅ ${completed}/${total}: ${details.name}${hasDiscount ? ` (-${priceInfo.discount_percent}%)` : ''}`)
 
           if (onProgress) {
             onProgress({ current: completed, total, game })
@@ -422,13 +436,13 @@ const steamApi = {
   },
 
   // ========== BÚSQUEDA AVANZADA CON FILTROS ==========
-  // 👇 ESTA FUNCIÓN AHORA ESTÁ DENTRO DEL OBJETO steamApi
+  // Reemplaza tu función searchGamesAdvanced en steamApi.js
   searchGamesAdvanced: async (term, options = {}) => {
     const {
       limit = 10,
       includeDetails = false,
       onlyGames = true,
-      includePlayers = false // 👈 NUEVO: Controlar si se incluyen jugadores
+      includePlayers = false
     } = options;
 
     try {
@@ -442,13 +456,12 @@ const steamApi = {
 
       let items = response?.items || [];
       
-      // Filtrar solo juegos (type debe ser "game")
+      // Filtrar solo juegos
       if (onlyGames) {
         items = items.filter(item => {
           const name = item.name.toLowerCase();
           const itemType = item.type?.toLowerCase() || '';
           
-          // Excluir DLCs, soundtracks, bundles, etc.
           const isDLC = name.includes('dlc') || 
                         name.includes('soundtrack') || 
                         name.includes('ost') ||
@@ -470,38 +483,57 @@ const steamApi = {
         const detailedGames = await steamApi.getMultipleGameDetails(appIds, {
           concurrency: 3,
           limit: items.length,
-          includePlayers: includePlayers // 👈 Pasar el parámetro
+          includePlayers: includePlayers
         });
         
         return detailedGames;
       }
 
-      // ✅ SOLUCIÓN: Mejorar el manejo de precios
+      // ✅ SOLUCIÓN: Extraer datos de descuento correctamente
       return items.map(item => {
         let priceDisplay = 'N/A';
+        let originalPrice = null;
+        let discountPercent = 0;
         
-        // La API devuelve el precio de diferentes formas
+        // Verificar si hay información de precio
         if (item.price) {
-          // Caso 1: price.final_formatted existe (precio con formato)
-          if (item.price.final_formatted) {
-            priceDisplay = item.price.final_formatted;
-          }
-          // Caso 2: price.final existe (precio en centavos)
-          else if (item.price.final !== undefined) {
-            if (item.price.final === 0) {
-              priceDisplay = 'Gratis';
-            } else {
-              // Convertir de centavos a pesos argentinos
+          // Caso 1: Tiene descuento
+          if (item.price.discount_percent && item.price.discount_percent > 0) {
+            discountPercent = item.price.discount_percent;
+            
+            // Precio final con descuento
+            if (item.price.final_formatted) {
+              priceDisplay = item.price.final_formatted;
+            } else if (item.price.final !== undefined) {
               const priceInARS = (item.price.final / 100).toFixed(2);
               priceDisplay = `ARS$ ${priceInARS}`;
             }
+            
+            // Precio original (sin descuento)
+            if (item.price.initial_formatted) {
+              originalPrice = item.price.initial_formatted;
+            } else if (item.price.initial !== undefined) {
+              const originalInARS = (item.price.initial / 100).toFixed(2);
+              originalPrice = `ARS$ ${originalInARS}`;
+            }
           }
-          // Caso 3: Si price existe pero es 0
-          else if (item.price === 0) {
-            priceDisplay = 'Gratis';
+          // Caso 2: Sin descuento
+          else {
+            if (item.price.final_formatted) {
+              priceDisplay = item.price.final_formatted;
+            } else if (item.price.final !== undefined) {
+              if (item.price.final === 0) {
+                priceDisplay = 'Gratis';
+              } else {
+                const priceInARS = (item.price.final / 100).toFixed(2);
+                priceDisplay = `ARS$ ${priceInARS}`;
+              }
+            } else if (item.price === 0) {
+              priceDisplay = 'Gratis';
+            }
           }
         }
-        // Caso 4: No hay información de precio pero sabemos que es gratis
+        // Juego gratis
         else if (item.is_free === true) {
           priceDisplay = 'Gratis';
         }
@@ -510,7 +542,11 @@ const steamApi = {
           appid: item.id,
           name: item.name,
           image: item.tiny_image || `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/capsule_184x69.jpg`,
-          price: priceDisplay
+          header_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/header.jpg`,
+          price: priceDisplay,
+          original_price: originalPrice,        // ✅ NUEVO
+          discount_percent: discountPercent,    // ✅ NUEVO
+          short_description: item.short_description || ''  // ✅ BONUS
         };
       });
 

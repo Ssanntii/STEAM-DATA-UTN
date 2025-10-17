@@ -18,16 +18,19 @@ const SearchDropdown = ({ suggestions, loading, query, onSelectGame, onClose }) 
 
   // Componente para mostrar precio con descuento
   const PriceTag = ({ game }) => {
-    const hasDiscount = game.discount_percent && game.discount_percent > 0;
+    // ✅ Verificar si REALMENTE hay descuento (no solo que exista la propiedad)
+    const hasDiscount = game.discount_percent && game.discount_percent > 0 && game.original_price;
 
     if (game.price === 'Gratis' || game.price === 'Free') {
-      return <span className="text-green-500 font-semibold">Gratis</span>;
+      return <span className="text-green-500 font-semibold text-xs">Gratis</span>;
     }
 
+    // ✅ Solo mostrar badge de descuento si REALMENTE hay descuento
     if (!hasDiscount) {
-      return <span className="text-muted-foreground">{game.price}</span>;
+      return <span className="text-muted-foreground text-xs">{game.price}</span>;
     }
 
+    // Mostrar precio con descuento
     return (
       <div className="flex items-center gap-1.5">
         <span className="bg-[#4c6b22] text-[#beee11] px-1.5 py-0.5 rounded text-[10px] font-bold">
@@ -54,43 +57,42 @@ const SearchDropdown = ({ suggestions, loading, query, onSelectGame, onClose }) 
         <>
           {/* Lista de sugerencias */}
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-            {suggestions.map((game) => (
-              <button
-                key={game.appid}
-                onClick={() => handleSelectGame(game)}
-                type="button"
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/10 transition-colors duration-200 text-left group"
-              >
-                {/* Imagen del juego */}
-                <div className="relative w-16 h-9 rounded overflow-hidden flex-shrink-0 bg-muted">
-                  {/* Badge de descuento en la imagen */}
-                  {game.discount_percent > 0 && (
-                    <div className="absolute top-0.5 left-0.5 bg-[#4c6b22] text-[#beee11] px-1 py-0.5 rounded text-[9px] font-bold z-10">
-                      -{game.discount_percent}%
-                    </div>
-                  )}
-                  
-                  <img
-                    src={game.image}
-                    alt={game.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                    onError={(e) => {
-                      e.target.src = `https://via.placeholder.com/184x69/1a1a1a/666666?text=No+Image`;
-                    }}
-                  />
-                </div>
-
-                {/* Info del juego */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-                    {game.name}
-                  </p>
-                  <div className="mt-0.5">
-                    <PriceTag game={game} />
+            {suggestions.map((game) => {
+              // ✅ Solo mostrar badge si hay descuento REAL
+              const hasDiscount = game.discount_percent && game.discount_percent > 0 && game.original_price;
+              
+              return (
+                <button
+                  key={game.appid}
+                  onClick={() => handleSelectGame(game)}
+                  type="button"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-primary/10 transition-colors duration-200 text-left group"
+                >
+                  {/* Imagen del juego */}
+                  <div className="relative w-16 h-9 rounded overflow-hidden flex-shrink-0 bg-muted">
+                    
+                    <img
+                      src={game.image}
+                      alt={game.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      onError={(e) => {
+                        e.target.src = `https://via.placeholder.com/184x69/1a1a1a/666666?text=No+Image`;
+                      }}
+                    />
                   </div>
-                </div>
-              </button>
-            ))}
+
+                  {/* Info del juego */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                      {game.name}
+                    </p>
+                    <div className="mt-0.5">
+                      <PriceTag game={game} />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Botón "Ver todos" */}

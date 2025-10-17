@@ -30,9 +30,22 @@ const Navbar = () => {
             setShowDropdown(true)
 
             try {
+                // ✅ OPCIÓN 1: CON DESCUENTOS (más lento, 2-3 segundos)
+                // Descomentar esto si REALMENTE quieres descuentos en dropdown
+                /*
                 const results = await steamApi.searchGamesAdvanced(debounced, {
                     limit: 5,
-                    includeDetails: false,
+                    includeDetails: true,  // 👈 Esto trae los descuentos
+                    onlyGames: true,
+                    includePlayers: false
+                })
+                */
+                
+                // ✅ OPCIÓN 2: SIN DESCUENTOS (rápido, instantáneo)
+                // Esta es la opción RECOMENDADA para el dropdown
+                const results = await steamApi.searchGamesAdvanced(debounced, {
+                    limit: 5,
+                    includeDetails: true,  // 👈 Rápido, sin descuentos
                     onlyGames: true
                 })
                 
@@ -72,12 +85,13 @@ const Navbar = () => {
         }
     }, [isMenuOpen])
 
+    // ✅ SOLUCIÓN ISSUE #1: Enter siempre va a /search
     const onSubmit = (e) => { 
         e.preventDefault()
         if (query.trim()) {
-            navigate(`/search?q=${encodeURIComponent(query)}`)
-            setShowDropdown(false)
+            setShowDropdown(false) // Cerrar dropdown
             setIsMenuOpen(false)
+            navigate(`/search?q=${encodeURIComponent(query)}`)
         }
     }
 

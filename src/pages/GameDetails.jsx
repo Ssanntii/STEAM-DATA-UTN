@@ -280,7 +280,7 @@ const GameDetails = () => {
                   {game.genres.map((genre) => (
                     <span
                       key={genre.id}
-                      className="badge bg-cyan-600/20 text-cyan-300 border border-cyan-500/30"
+                      className="badge bg-cyan-600 text-cyan-400 border-cyan-900 dark:bg-cyan-600/20 dark:text-cyan-300 border dark:border-cyan-500/30"
                     >
                       {genre.description}
                     </span>
@@ -295,19 +295,19 @@ const GameDetails = () => {
                 <h3 className="text-lg font-semibold mb-3">Plataformas</h3>
                 <div className="space-y-2">
                   {game.platforms.windows && (
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <div className="flex items-center gap-2 text-black dark:text-gray-300">
                       <span className="text-blue-400">●</span>
                       Windows
                     </div>
                   )}
                   {game.platforms.mac && (
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <div className="flex items-center gap-2 text-black dark:text-gray-300">
                       <span className="text-blue-400">●</span>
                       Mac
                     </div>
                   )}
                   {game.platforms.linux && (
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <div className="flex items-center gap-2 text-black dark:text-gray-300">
                       <span className="text-blue-400">●</span>
                       Linux
                     </div>
@@ -322,7 +322,7 @@ const GameDetails = () => {
                 <h3 className="text-lg font-semibold mb-3">Distribuidores</h3>
                 <div className="space-y-1">
                   {game.publishers.map((pub, i) => (
-                    <div key={i} className="text-gray-300">
+                    <div key={i} className="text-black dark:text-gray-300">
                       {pub}
                     </div>
                   ))}
@@ -337,7 +337,7 @@ const GameDetails = () => {
           <div className="glass p-6 rounded-2xl">
             <h2 className="text-xl font-semibold mb-4">Acerca de este juego</h2>
             <div
-              className="prose prose-invert max-w-none text-gray-300"
+              className="prose prose-invert max-w-none text-black dark:text-gray-300"
               dangerouslySetInnerHTML={{ __html: game.detailed_description }}
             />
           </div>

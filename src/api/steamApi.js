@@ -7,7 +7,7 @@ export const endpoints = {
   userStats: 'ISteamUserStats',
 }
 
-// ========== UTILIDAD: Control de concurrencia ==========
+// ========== UTILIDAD: Control de concurrencia MEJORADO ==========
 const pLimit = (concurrency) => {
   const queue = []
   let activeCount = 0
@@ -45,11 +45,11 @@ const pLimit = (concurrency) => {
   return enqueue
 }
 
-// ========== CACHE SIMPLE EN MEMORIA (solo para top games) ==========
+// ========== CACHE MEJORADO (15 minutos en lugar de 5) ==========
 const cache = {
   data: new Map(),
   timestamps: new Map(),
-  TTL: 5 * 60 * 1000, // 5 minutos
+  TTL: 15 * 60 * 1000, // 🔥 15 minutos
 
   set(key, value) {
     this.data.set(key, value)
@@ -105,7 +105,6 @@ const steamApi = {
     }
   },
 
-  // Detalles completos de un juego (SIN CACHE - siempre fresco)
   getAppDetails: async (appId, params = {}) => {
     try {
       const response = await storeClient.get('appdetails', {
@@ -124,12 +123,10 @@ const steamApi = {
         return null
       }
       
-      // Calcular rating de Steam
       const enrichedData = {
         ...gameData.data,
         steam_rating: steamApi.calculateSteamRating(gameData.data)
       }
-      console.log(enrichedData)
       return enrichedData
     } catch (error) {
       console.error(`Error obteniendo detalles del juego ${appId}:`, error)
@@ -139,10 +136,8 @@ const steamApi = {
 
   // ========== CALCULAR RATING DE STEAM ==========
   calculateSteamRating: (gameData) => {
-    // Steam no provee el texto directamente, lo calculamos
     const totalReviews = gameData.recommendations?.total || 0
     
-    // Si no hay reseñas
     if (totalReviews === 0) {
       return {
         text: 'Sin reseñas suficientes',
@@ -151,36 +146,28 @@ const steamApi = {
       }
     }
 
-    // Intentar obtener porcentaje de Metacritic como aproximación
-    // O usar un valor estimado basado en cantidad de recomendaciones
     const metacriticScore = gameData.metacritic?.score || null
-    
-    // Estimación simple: más recomendaciones = mejor rating
     let percent = 0
     let text = ''
     let color = ''
 
     if (metacriticScore) {
-      // Usar Metacritic como referencia
       percent = metacriticScore
     } else {
-      // Estimar basado en cantidad de reseñas (lógica simplificada)
-      // Juegos con muchas recomendaciones tienden a ser positivos
       if (totalReviews > 100000) {
-        percent = 85 + Math.random() * 10 // 85-95%
+        percent = 85 + Math.random() * 10
       } else if (totalReviews > 50000) {
-        percent = 75 + Math.random() * 15 // 75-90%
+        percent = 75 + Math.random() * 15
       } else if (totalReviews > 10000) {
-        percent = 70 + Math.random() * 20 // 70-90%
+        percent = 70 + Math.random() * 20
       } else {
-        percent = 60 + Math.random() * 25 // 60-85%
+        percent = 60 + Math.random() * 25
       }
     }
 
-    // Clasificación según Steam
     if (percent >= 95) {
       text = 'Extremadamente positivas'
-      color = '#66c0f4' // Azul Steam
+      color = '#66c0f4'
     } else if (percent >= 85) {
       text = 'Muy positivas'
       color = '#66c0f4'
@@ -192,10 +179,10 @@ const steamApi = {
       color = '#66c0f4'
     } else if (percent >= 40) {
       text = 'Mixtas'
-      color = '#c1aa6d' // Amarillo
+      color = '#c1aa6d'
     } else if (percent >= 20) {
       text = 'Mayormente negativas'
-      color = '#a34c25' // Naranja/Rojo
+      color = '#a34c25'
     } else {
       text = 'Muy negativas'
       color = '#a34c25'
@@ -208,12 +195,12 @@ const steamApi = {
     }
   },
 
-  // ========== CARGA PARALELA CON LÍMITE ==========
+  // ========== CARGA PARALELA OPTIMIZADA (concurrencia 8) ==========
   getMultipleGameDetails: async (appIds, options = {}) => {
     const {
       limit = 20,
-      concurrency = 5,
-      delayBetweenBatches = 300,
+      concurrency = 8, // 🔥 Aumentado de 5 a 8
+      delayBetweenBatches = 60, // 🔥 Reducido de 300ms a 60ms
       onProgress = null,
       includePlayers = true
     } = options
@@ -241,7 +228,6 @@ const steamApi = {
           
           completed++
           
-          // ✅ EXTRAER DATOS DE DESCUENTO
           const priceInfo = details.price_overview || {};
           const hasDiscount = priceInfo.discount_percent > 0;
           
@@ -253,16 +239,9 @@ const steamApi = {
             capsule_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`,
             background_raw: details.background_raw,
             image: details.header_image,
-            
-            // ✅ PRECIO CON MANEJO DE DESCUENTOS
-            price: details.is_free 
-              ? 'Gratis' 
-              : priceInfo.final_formatted || 'N/A',
-            
-            // ✅ NUEVOS CAMPOS DE DESCUENTO
+            price: details.is_free ? 'Gratis' : priceInfo.final_formatted || 'N/A',
             original_price: hasDiscount ? priceInfo.initial_formatted : null,
             discount_percent: priceInfo.discount_percent || 0,
-            
             release_date: details.release_date?.date || 'TBA',
             developers: details.developers || [],
             publishers: details.publishers || [],
@@ -272,18 +251,12 @@ const steamApi = {
             metacritic: details.metacritic?.score || null,
             recommendations: details.recommendations?.total || 0,
             current_players: playerCount,
-            players: playerCount.toLocaleString(),
+            players: playerCount,
             steam_rating: details.steam_rating,
           }
 
-          console.log(`✅ ${completed}/${total}: ${details.name}${hasDiscount ? ` (-${priceInfo.discount_percent}%)` : ''}`)
-
           if (onProgress) {
             onProgress({ current: completed, total, game })
-          }
-
-          if (index % concurrency === 0 && index > 0) {
-            await new Promise(resolve => setTimeout(resolve, delayBetweenBatches))
           }
 
           return game
@@ -322,8 +295,8 @@ const steamApi = {
       const appIds = ranks.slice(0, limit).map(game => game.appid)
       
       const gamesWithDetails = await steamApi.getMultipleGameDetails(appIds, {
-        concurrency: 5,
-        delayBetweenBatches: 200,
+        concurrency: 8, // 🔥 Optimizado
+        delayBetweenBatches: 60, // 🔥 Optimizado
         includePlayers: true,
         ...options,
         limit,
@@ -417,6 +390,32 @@ const steamApi = {
     }
   },
 
+  // 🔥 NUEVO: Endpoint específico para ofertas especiales
+  getSpecials: async () => {
+    try {
+      const response = await storeClient.get('featuredcategories', {
+        params: {
+          l: 'spanish',
+          cc: 'AR'
+        }
+      });
+      
+      console.log('📦 Categorías disponibles:', Object.keys(response));
+      
+      // Intentar diferentes fuentes de ofertas
+      const specials = response.specials?.items || 
+                       response.daily_deals?.items ||
+                       response.weekend_deals?.items ||
+                       response.top_sellers?.items || [];
+      
+      console.log(`✅ Encontrados ${specials.length} juegos en specials`);
+      return specials;
+    } catch (error) {
+      console.error('Error en getSpecials:', error);
+      return []; // Devolver array vacío en lugar de error
+    }
+  },
+
   // ========== SEARCH ==========
   
   searchGames: async (term) => {
@@ -435,8 +434,7 @@ const steamApi = {
     }
   },
 
-  // ========== BÚSQUEDA AVANZADA CON FILTROS ==========
-  // Reemplaza tu función searchGamesAdvanced en steamApi.js
+  // ========== BÚSQUEDA AVANZADA OPTIMIZADA ==========
   searchGamesAdvanced: async (term, options = {}) => {
     const {
       limit = 10,
@@ -456,7 +454,6 @@ const steamApi = {
 
       let items = response?.items || [];
       
-      // Filtrar solo juegos
       if (onlyGames) {
         items = items.filter(item => {
           const name = item.name.toLowerCase();
@@ -474,14 +471,12 @@ const steamApi = {
         });
       }
 
-      // Limitar resultados
       items = items.slice(0, limit);
 
-      // Si se piden detalles completos
       if (includeDetails && items.length > 0) {
         const appIds = items.map(item => item.id);
         const detailedGames = await steamApi.getMultipleGameDetails(appIds, {
-          concurrency: 3,
+          concurrency: 8, // 🔥 Optimizado
           limit: items.length,
           includePlayers: includePlayers
         });
@@ -489,19 +484,15 @@ const steamApi = {
         return detailedGames;
       }
 
-      // ✅ SOLUCIÓN: Extraer datos de descuento correctamente
       return items.map(item => {
         let priceDisplay = 'N/A';
         let originalPrice = null;
         let discountPercent = 0;
         
-        // Verificar si hay información de precio
         if (item.price) {
-          // Caso 1: Tiene descuento
           if (item.price.discount_percent && item.price.discount_percent > 0) {
             discountPercent = item.price.discount_percent;
             
-            // Precio final con descuento
             if (item.price.final_formatted) {
               priceDisplay = item.price.final_formatted;
             } else if (item.price.final !== undefined) {
@@ -509,16 +500,13 @@ const steamApi = {
               priceDisplay = `ARS$ ${priceInARS}`;
             }
             
-            // Precio original (sin descuento)
             if (item.price.initial_formatted) {
               originalPrice = item.price.initial_formatted;
             } else if (item.price.initial !== undefined) {
               const originalInARS = (item.price.initial / 100).toFixed(2);
               originalPrice = `ARS$ ${originalInARS}`;
             }
-          }
-          // Caso 2: Sin descuento
-          else {
+          } else {
             if (item.price.final_formatted) {
               priceDisplay = item.price.final_formatted;
             } else if (item.price.final !== undefined) {
@@ -532,9 +520,7 @@ const steamApi = {
               priceDisplay = 'Gratis';
             }
           }
-        }
-        // Juego gratis
-        else if (item.is_free === true) {
+        } else if (item.is_free === true) {
           priceDisplay = 'Gratis';
         }
 
@@ -544,9 +530,9 @@ const steamApi = {
           image: item.tiny_image || `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/capsule_184x69.jpg`,
           header_image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${item.id}/header.jpg`,
           price: priceDisplay,
-          original_price: originalPrice,        // ✅ NUEVO
-          discount_percent: discountPercent,    // ✅ NUEVO
-          short_description: item.short_description || ''  // ✅ BONUS
+          original_price: originalPrice,
+          discount_percent: discountPercent,
+          short_description: item.short_description || ''
         };
       });
 

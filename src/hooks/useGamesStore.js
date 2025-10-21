@@ -14,7 +14,7 @@ const useGamesStore = create(
       error: null,
       lastFetch: null,
       lastFetchSellers: null,
-      lastFetchOffers: null, // 🔥 NUEVO: Cache separado para ofertas
+      lastFetchOffers: null,
       progress: 0,
 
       // Actions
@@ -27,7 +27,7 @@ const useGamesStore = create(
         const { topGames, lastFetch } = get();
         const { forceRefresh = false } = options;
         const now = Date.now();
-        const CACHE_TIME = 15 * 60 * 1000; // 🔥 15 minutos
+        const CACHE_TIME = 15 * 60 * 1000;
 
         if (topGames.length > 0 && lastFetch && (now - lastFetch < CACHE_TIME) && !forceRefresh) {
           console.log('📦 Usando datos del cache de Zustand (Top Games)');
@@ -63,7 +63,7 @@ const useGamesStore = create(
         const { topSellers, lastFetchSellers } = get();
         const { forceRefresh = false } = options;
         const now = Date.now();
-        const CACHE_TIME = 15 * 60 * 1000; // 🔥 15 minutos
+        const CACHE_TIME = 15 * 60 * 1000;
 
         if (topSellers.length > 0 && lastFetchSellers && (now - lastFetchSellers < CACHE_TIME) && !forceRefresh) {
           console.log('📦 Usando datos del cache de Zustand (Top Sellers)');
@@ -84,7 +84,6 @@ const useGamesStore = create(
           
           sellerIds = sellerIds.slice(0, limit);
 
-          // 🔥 USAR getMultipleGameDetails optimizado
           const games = await steamApi.getMultipleGameDetails(sellerIds.map(item => item.id || item.appid || item), {
             concurrency: 8,
             limit: sellerIds.length,
@@ -94,7 +93,6 @@ const useGamesStore = create(
             }
           });
 
-          // Agregar ranking
           const enrichedGames = games.map((game, index) => ({
             ...game,
             rank: index + 1
@@ -115,12 +113,12 @@ const useGamesStore = create(
         }
       },
 
-      // ========== FETCH OFFERS (OFERTAS) - OPTIMIZADO Y MEJORADO 🔥 ==========
+      // ========== FETCH OFFERS (OFERTAS) - OPTIMIZADO ==========
       fetchOffers: async (limit = 150, options = {}) => {
         const { offersGames, lastFetchOffers } = get();
         const { forceRefresh = false } = options;
         const now = Date.now();
-        const CACHE_TIME = 30 * 60 * 1000; // 🔥 30 minutos (ofertas cambian menos)
+        const CACHE_TIME = 30 * 60 * 1000;
 
         if (offersGames.length > 0 && lastFetchOffers && (now - lastFetchOffers < CACHE_TIME) && !forceRefresh) {
           console.log('📦 Usando datos del cache de Zustand (Ofertas)');
@@ -156,7 +154,7 @@ const useGamesStore = create(
               return [id, item];
             })).values()];
             
-            offerIds = offerIds.slice(0, 300); // Tomar hasta 300 para revisar
+            offerIds = offerIds.slice(0, 300);
             console.log(`✅ Total de IDs para revisar: ${offerIds.length}`);
           }
           
@@ -166,13 +164,12 @@ const useGamesStore = create(
           
           // PASO 3: Procesar en lotes para encontrar ofertas
           const games = [];
-          const BATCH_SIZE = 10; // 🔥 Procesar 10 juegos a la vez
+          const BATCH_SIZE = 10;
           let processedCount = 0;
           
           for (let i = 0; i < offerIds.length && games.length < limit; i += BATCH_SIZE) {
             const batch = offerIds.slice(i, i + BATCH_SIZE);
             
-            // 🔥 Procesar batch en paralelo
             const batchPromises = batch.map(async (item) => {
               try {
                 const gameId = item.id || item.appid || item;
@@ -183,7 +180,6 @@ const useGamesStore = create(
                 const priceInfo = gameDetails.price_overview || {};
                 const discountPercent = priceInfo.discount_percent || 0;
                 
-                // Solo agregar si tiene descuento
                 if (discountPercent > 0) {
                   return {
                     appid: gameId,
@@ -215,16 +211,12 @@ const useGamesStore = create(
               }
             });
             
-            // Esperar a que termine el batch
             const batchResults = await Promise.all(batchPromises);
-            
-            // Agregar juegos válidos
             const validGames = batchResults.filter(game => game !== null);
             games.push(...validGames);
             
             processedCount += batch.length;
             
-            // Actualizar progreso
             const progress = Math.min(
               Math.round((games.length / limit) * 100),
               Math.round((processedCount / offerIds.length) * 100)
@@ -233,9 +225,8 @@ const useGamesStore = create(
             
             console.log(`✅ Ofertas encontradas: ${games.length}/${limit} | Procesados: ${processedCount}/${offerIds.length}`);
             
-            // Pequeño delay entre batches (más corto)
             if (games.length < limit && i + BATCH_SIZE < offerIds.length) {
-              await new Promise(resolve => setTimeout(resolve, 50)); // 🔥 50ms en lugar de 100ms
+              await new Promise(resolve => setTimeout(resolve, 50));
             }
           }
 
@@ -301,10 +292,17 @@ const useGamesStore = create(
         const { fetchTopGames } = get();
         await fetchTopGames(20, { forceRefresh: true });
       },
+
       // Refrescar sellers
       refreshSellers: async () => {
         const { fetchTopSellers } = get();
         await fetchTopSellers(150, { forceRefresh: true });
+      },
+
+      // 🔥 NUEVO: Refrescar ofertas
+      refreshOffers: async () => {
+        const { fetchOffers } = get();
+        await fetchOffers(150, { forceRefresh: true });
       }
     }),
     {
@@ -316,6 +314,7 @@ const useGamesStore = create(
         offersGames: state.offersGames,
         lastFetch: state.lastFetch,
         lastFetchSellers: state.lastFetchSellers,
+        lastFetchOffers: state.lastFetchOffers // 🔥 Guardar también el cache de ofertas
       }),
     }
   )

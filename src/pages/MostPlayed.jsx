@@ -85,7 +85,7 @@ export default function MostPlayed() {
         </h1>
         
         <p className="text-lg text-foreground/70 dark:text-gray-400">
-          Top 150 juegos con más jugadores activos en este momento
+          Top juegos con más jugadores activos en este momento
         </p>
       </div>
 

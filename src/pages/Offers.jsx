@@ -159,19 +159,19 @@ export default function Offers() {
                 Mayor descuento
               </div>
               <div className="text-xs text-foreground/60 dark:text-gray-500 mt-1">
-                En ofertas activas
+                ¡Ofertaza!
               </div>
             </div>
 
             <div className="glass p-6 rounded-2xl">
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                -{averageDiscount}%
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {offersGames.filter((g) => (g.discount_percent || 0) >= 75).length}
               </div>
               <div className="text-sm text-foreground/70 dark:text-gray-400 mt-1">
-                Descuento promedio
+                Con -75% o más
               </div>
               <div className="text-xs text-foreground/60 dark:text-gray-500 mt-1">
-                En todas las ofertas
+                ¡Super ofertas!
               </div>
             </div>
 
@@ -188,14 +188,14 @@ export default function Offers() {
             </div>
 
             <div className="glass p-6 rounded-2xl">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {offersGames.filter((g) => (g.discount_percent || 0) >= 75).length}
+              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                -{averageDiscount}%
               </div>
               <div className="text-sm text-foreground/70 dark:text-gray-400 mt-1">
-                Con -75% o más
+                Descuento promedio
               </div>
               <div className="text-xs text-foreground/60 dark:text-gray-500 mt-1">
-                ¡Super ofertas!
+                En todas las ofertas
               </div>
             </div>
           </div>

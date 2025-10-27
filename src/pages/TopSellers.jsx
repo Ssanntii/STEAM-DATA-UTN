@@ -88,7 +88,7 @@ export default function TopSellers() {
         </div>
         
         <p className="text-lg text-foreground/70 dark:text-gray-400">
-          Top 150 juegos más vendidos en Steam
+          Top juegos más vendidos en Steam
         </p>
       </div>
 

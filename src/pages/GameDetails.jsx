@@ -21,7 +21,6 @@ const GameDetails = () => {
         
         // Fetch directo a steamApi (sin store)
         const details = await steamApi.getAppDetails(id);
-        console.log('Detalles del juego:', details);
         setGame(details);
       } catch (err) {
         console.error('Error cargando detalles:', err);

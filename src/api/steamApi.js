@@ -77,7 +77,6 @@ const steamApi = {
   getTopPlayed: async (params = {}) => {
     const cacheKey = 'topPlayed'
     if (cache.has(cacheKey)) {
-      console.log('📦 Usando top played desde cache')
       return cache.get(cacheKey)
     }
 
@@ -208,8 +207,6 @@ const steamApi = {
     const total = Math.min(appIds.length, limit)
     const idsToFetch = appIds.slice(0, total)
     
-    console.log(`🎮 Obteniendo detalles de ${total} juegos (${concurrency} en paralelo)...`)
-    
     const limiter = pLimit(concurrency)
     let completed = 0
 
@@ -271,7 +268,6 @@ const steamApi = {
     const results = await Promise.all(promises)
     const validGames = results.filter(game => game !== null)
     
-    console.log(`✨ Total de juegos obtenidos: ${validGames.length}/${total}`)
     return validGames
   },
 
@@ -280,7 +276,6 @@ const steamApi = {
     const cacheKey = `topGamesWithDetails_${limit}`
     
     if (!options.forceRefresh && cache.has(cacheKey)) {
-      console.log('📦 Usando top games desde cache')
       return cache.get(cacheKey)
     }
 
@@ -400,15 +395,12 @@ const steamApi = {
         }
       });
       
-      console.log('📦 Categorías disponibles:', Object.keys(response));
-      
       // Intentar diferentes fuentes de ofertas
       const specials = response.specials?.items || 
                        response.daily_deals?.items ||
                        response.weekend_deals?.items ||
                        response.top_sellers?.items || [];
       
-      console.log(`✅ Encontrados ${specials.length} juegos en specials`);
       return specials;
     } catch (error) {
       console.error('Error en getSpecials:', error);
@@ -546,7 +538,6 @@ const steamApi = {
   clearCache: () => {
     cache.data.clear()
     cache.timestamps.clear()
-    console.log('🗑️ Cache limpiado')
   }
 }
 

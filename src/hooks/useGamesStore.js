@@ -30,7 +30,6 @@ const useGamesStore = create(
         const CACHE_TIME = 15 * 60 * 1000;
 
         if (topGames.length > 0 && lastFetch && (now - lastFetch < CACHE_TIME) && !forceRefresh) {
-          console.log('📦 Usando datos del cache de Zustand (Top Games)');
           return topGames;
         }
 
@@ -66,14 +65,12 @@ const useGamesStore = create(
         const CACHE_TIME = 15 * 60 * 1000;
 
         if (topSellers.length > 0 && lastFetchSellers && (now - lastFetchSellers < CACHE_TIME) && !forceRefresh) {
-          console.log('📦 Usando datos del cache de Zustand (Top Sellers)');
           return topSellers;
         }
 
         try {
           set({ loading: true, error: null, progress: 0 });
 
-          console.log('🔍 Obteniendo featured games...');
           const response = await steamApi.getFeatured();
           
           let sellerIds = response.featured_win || response.top_sellers?.items || [];
@@ -121,14 +118,11 @@ const useGamesStore = create(
         const CACHE_TIME = 30 * 60 * 1000;
 
         if (offersGames.length > 0 && lastFetchOffers && (now - lastFetchOffers < CACHE_TIME) && !forceRefresh) {
-          console.log('📦 Usando datos del cache de Zustand (Ofertas)');
           return offersGames;
         }
 
         try {
           set({ loading: true, error: null, progress: 0 });
-
-          console.log('🔍 Buscando ofertas especiales...');
           
           // PASO 1: Intentar con el endpoint de specials
           let offerIds = [];
@@ -136,7 +130,6 @@ const useGamesStore = create(
             const specials = await steamApi.getSpecials();
             if (specials && specials.length > 0) {
               offerIds = specials.slice(0, 250);
-              console.log(`✅ Encontrados ${offerIds.length} IDs en specials`);
             }
           } catch (err) {
             console.warn('⚠️ Specials no disponible');
@@ -155,7 +148,6 @@ const useGamesStore = create(
             })).values()];
             
             offerIds = offerIds.slice(0, 300);
-            console.log(`✅ Total de IDs para revisar: ${offerIds.length}`);
           }
           
           if (offerIds.length === 0) {
@@ -223,14 +215,10 @@ const useGamesStore = create(
             );
             set({ progress });
             
-            console.log(`✅ Ofertas encontradas: ${games.length}/${limit} | Procesados: ${processedCount}/${offerIds.length}`);
-            
             if (games.length < limit && i + BATCH_SIZE < offerIds.length) {
               await new Promise(resolve => setTimeout(resolve, 50));
             }
           }
-
-          console.log(`🎉 Total de ofertas obtenidas: ${games.length}`);
 
           if (games.length === 0) {
             set({ 
